@@ -11,8 +11,7 @@
 #include <tchar.h>
 #include <time.h>
 #include <stdlib.h>
-#include <pthreads.h>
-
+#include <pthread.h>
 
 
 // TODO: reference additional headers your program requires here
