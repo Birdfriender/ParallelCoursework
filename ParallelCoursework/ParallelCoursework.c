@@ -10,14 +10,14 @@
 
 const unsigned int ARRAY_SEED = 38423;
 
-const double EPSILON = 0.01;
-const unsigned int ARRAY_DIMENSIONS = 100;
-const unsigned int NUM_THREADS = 16;
+const double EPSILON = 1;
+const unsigned int ARRAY_DIMENSIONS = 200;
+const unsigned int NUM_THREADS = 2;
 pthread_mutex_t epsilon_mutex;
 pthread_barrier_t barrier;
 
-double array[100][100];
-double resultArray[100][100];
+double array[200][200];
+double resultArray[200][200];
 
 double highestChange = 0.0;
 
@@ -134,14 +134,18 @@ int main()
 	{
 		pthread_join(threads[i], NULL);
 	}
+
 	time_t endTime;
 	endTime = time(NULL);
+	struct tm * timeinfo;
+	timeinfo = localtime(&startTime);
+	double timeTaken = difftime(endTime, startTime);
+
 	char string[100] = "";
-	sprintf(string, "thh37-results.txt");/*
-	bytes = sprintf(string + bytes, asctime(&startTime));
-	sprintf(string + bytes, ".txt");*/
+	sprintf(string, "thh37-results-%d-%d-%d--%d-%d-%d.txt", timeinfo->tm_year + 1990,
+		timeinfo->tm_mon, timeinfo->tm_mday, timeinfo->tm_hour,
+		timeinfo->tm_min, timeinfo->tm_sec);
 	FILE *f = fopen(string, "w");
-	printf("fopened");
 	for (int i = 0; i < ARRAY_DIMENSIONS; i++)
 	{
 		for (int j = 0; j < ARRAY_DIMENSIONS; j++)
@@ -151,7 +155,7 @@ int main()
 		fprintf(f, "\n");
 	}
 	fprintf(f, "\nTime taken: ");
-	fprintf(f, "%lf", difftime(endTime, startTime));
+	fprintf(f, "%lf", timeTaken);
 	fclose(f);
     return 0;
 }
