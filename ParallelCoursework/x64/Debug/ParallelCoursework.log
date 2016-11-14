@@ -1,0 +1,35 @@
+﻿clang-cl.exe : warning : argument unused during compilation: '/ZI'
+clang-cl.exe : warning : argument unused during compilation: '/Gm'
+  In file included from ParallelCoursework.c:8:
+C:\pthreads-w32\Pre-built.2\include\pthread.h(320,8): error : redefinition of 'timespec'
+  struct timespec {
+         ^
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\time.h(38,12):  note: previous definition is here
+      struct timespec
+             ^
+ParallelCoursework.c(184,18): warning : 'ctime' is deprecated: This function or variable may be unsafe. Consider using ctime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+          sprintf(string, ctime(&startTime));
+                          ^
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\time.h(475,41):  note: 'ctime' has been explicitly marked deprecated here
+          static __inline char* __CRTDECL ctime(
+                                          ^
+ParallelCoursework.c(184,18): warning : format string is not a string literal (potentially insecure) [-Wformat-security]
+          sprintf(string, ctime(&startTime));
+                          ^~~~~~~~~~~~~~~~~
+  ParallelCoursework.c(184,18):  note: treat the string as an argument to avoid this
+          sprintf(string, ctime(&startTime));
+                          ^
+                          "%s", 
+ParallelCoursework.c(185,12): warning : 'fopen' is deprecated: This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+          FILE *f = fopen(string, "w");
+                    ^
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(205,24):  note: 'fopen' has been explicitly marked deprecated here
+  _ACRTIMP FILE* __cdecl fopen(
+                         ^
+ParallelCoursework.c(189,8): warning : 'ctime' is deprecated: This function or variable may be unsafe. Consider using ctime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+          fputs(ctime(&timeTaken), f);
+                ^
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\time.h(475,41):  note: 'ctime' has been explicitly marked deprecated here
+          static __inline char* __CRTDECL ctime(
+                                          ^
+  4 warnings and 1 error generated.
