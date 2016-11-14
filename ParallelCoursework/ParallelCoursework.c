@@ -12,7 +12,7 @@ const unsigned int ARRAY_SEED = 38423;
 
 const double EPSILON = 0.01;
 const unsigned int ARRAY_DIMENSIONS = 100;
-const unsigned int NUM_THREADS = 15;
+const unsigned int NUM_THREADS = 16;
 pthread_mutex_t epsilon_mutex;
 pthread_barrier_t barrier;
 
@@ -91,7 +91,6 @@ int main()
 		rows[i].endRow = ((i + 1) * rowsPerThread) + 1;
 	}
 	rows[NUM_THREADS - 1].endRow += ARRAY_DIMENSIONS % NUM_THREADS - 2;
-
 	printf("Firing off threads\n");
 	pthread_t threads[15];
 	for (int i = 0; i < NUM_THREADS - 1; i++)
@@ -131,7 +130,7 @@ int main()
 			pthread_barrier_wait(&barrier);
 		} while (highestChange > EPSILON);
 	}
-	for (int i = 0; i < NUM_THREADS; i++)
+	for (int i = 0; i < NUM_THREADS - 1; i++)
 	{
 		pthread_join(threads[i], NULL);
 	}
