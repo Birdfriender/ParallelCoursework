@@ -2,22 +2,22 @@
 //
 
 #include <stdio.h>
-#include <tchar.h>
 #include <time.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
 
-const unsigned int ARRAY_SEED = 38423;
+const unsigned int ARRAY_SEED = 332484;
 
-const double EPSILON = 1;
-const unsigned int ARRAY_DIMENSIONS = 200;
-const unsigned int NUM_THREADS = 2;
+const double EPSILON = 1.0;
+unsigned long ARRAY_DIMENSIONS;
+unsigned long NUM_THREADS;
+unsigned long loopIt; //this is to generate a unique filename not actually part of the functionality
 pthread_mutex_t epsilon_mutex;
 pthread_barrier_t barrier;
 
-double array[200][200];
-double resultArray[200][200];
+double **array;
+double **resultArray;
 
 double highestChange = 0.0;
 
@@ -51,6 +51,7 @@ void row_thread(struct Rows* rows)
 					change = diff;
 			}
 		}
+		pthread_barrier_wait(&barrier);
 		pthread_mutex_lock(&epsilon_mutex);
 		if (change > highestChange)
 			highestChange = change;
@@ -61,25 +62,66 @@ void row_thread(struct Rows* rows)
 
 void populateArrayRand(int aSeed)
 {
+	printf("Populating array");
 	srand(aSeed);
 	for (int i = 0; i < ARRAY_DIMENSIONS; i++)
 	{
 		for (int j = 0; j < ARRAY_DIMENSIONS; j++)
 		{
-			array[i][j] = rand();
+			array[i][j] = rand() % 100;
+			resultArray[i][j] = array[i][j];
 		}
 	}
-	memcpy(resultArray, array, sizeof(double) * ARRAY_DIMENSIONS * ARRAY_DIMENSIONS);
 	printf("Populated Array\n");
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	if (argc != 4)
+	{
+		printf("Invalid Arguments");
+		return 1;
+	}
+	ARRAY_DIMENSIONS = strtoul(argv[1], NULL, 10);
+	NUM_THREADS = strtoul(argv[2], NULL, 10);
+	loopIt = strtoul(argv[3], NULL, 10);
+	array = malloc(sizeof(double*) * ARRAY_DIMENSIONS);
+	if (array == NULL)
+	{
+		printf("Malloc Failed");
+		return 1;
+	}
+
+	resultArray = malloc(sizeof(double*) * ARRAY_DIMENSIONS);
+	if (resultArray == NULL)
+	{
+		printf("Malloc Failed");
+		return 1;
+	}
+
+	for (int i = 0; i < ARRAY_DIMENSIONS; i++)
+	{
+		array[i] = malloc(sizeof(double) * ARRAY_DIMENSIONS);
+		if (array[i] == NULL)
+		{
+			printf("Malloc Failed");
+			return 1;
+		}
+		resultArray[i] = malloc(sizeof(double) * ARRAY_DIMENSIONS);
+		if (resultArray[i] == NULL)
+		{
+			printf("Malloc Failed");
+			return 1;
+		}
+	}
+
 	printf("Starting\n");
 	populateArrayRand(ARRAY_SEED);
+
 	pthread_barrier_init(&barrier, NULL, NUM_THREADS);
 	int rowsPerThread = ARRAY_DIMENSIONS / NUM_THREADS;
 	time_t startTime;
+
 	startTime = time(NULL);
 
 	pthread_mutex_init(&epsilon_mutex, NULL);
@@ -103,7 +145,9 @@ int main()
 	{
 		do
 		{
-			memcpy(array, resultArray, sizeof(double) * ARRAY_DIMENSIONS * ARRAY_DIMENSIONS);
+			double **temp = resultArray;
+			resultArray = array;
+			array = temp;
 			pthread_barrier_wait(&barrier);
 			highestChange = 0;
 			double change = 0.0;
@@ -123,6 +167,7 @@ int main()
 						change = diff;
 				}
 			}
+			pthread_barrier_wait(&barrier);
 			pthread_mutex_lock(&epsilon_mutex);
 			if (change > highestChange)
 				highestChange = change;
@@ -142,20 +187,25 @@ int main()
 	double timeTaken = difftime(endTime, startTime);
 
 	char string[100] = "";
-	sprintf(string, "thh37-results-%d-%d-%d--%d-%d-%d.txt", timeinfo->tm_year + 1990,
+	/*sprintf(string, "%ld-thh37-results-%d-%d-%d--%d-%d-%d.txt", NUM_THREADS, 
+		timeinfo->tm_year + 1900,
 		timeinfo->tm_mon, timeinfo->tm_mday, timeinfo->tm_hour,
-		timeinfo->tm_min, timeinfo->tm_sec);
+		timeinfo->tm_min, timeinfo->tm_sec);*/
+	sprintf(string, "ParallelResults-%ld-%ld.txt", NUM_THREADS, loopIt);
+
 	FILE *f = fopen(string, "w");
+	fprintf(f, "Number of threads %ld\n", NUM_THREADS);
+	fprintf(f, "Size of array: %ld\n", ARRAY_DIMENSIONS);
+	fprintf(f, "\nTime taken: ");
+	fprintf(f, "%lf\n", timeTaken);
 	for (int i = 0; i < ARRAY_DIMENSIONS; i++)
 	{
 		for (int j = 0; j < ARRAY_DIMENSIONS; j++)
 		{
-			fprintf(f, "%lf ", array[i][j]);
+			fprintf(f, "%lf ", resultArray[i][j]);
 		}
 		fprintf(f, "\n");
 	}
-	fprintf(f, "\nTime taken: ");
-	fprintf(f, "%lf", timeTaken);
 	fclose(f);
     return 0;
 }
